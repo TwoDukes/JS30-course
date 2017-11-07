@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Speech Detection</title>
+</head>
+<body>
+
+  <div class="words" contenteditable>
+  </div>
+
+<script>
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recognition = new SpeechRecognition();
+  recognition.interimResults = true;
+
+  let p = document.createElement('p');
+  const words = document.querySelector('.words');
+  words.appendChild(p);
+
+  recognition.addEventListener('result', e => {
+    const transcript = Array.from(e.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('')
+
+          p.textContent = transcript;
+          if(e.results[0].isFinal){
+            p = document.createElement('p');
+            words.appendChild(p);
+          }
+
+          if(transcript.includes('unicorn') || transcript.includes('unicorns')){
+            cornify_add();
+          }
+
+          if(transcript.includes('reload')){
+            location.reload();
+          }
+
+          if(transcript.includes('turn off display')|| transcript.includes('turn display off')){
+            words.style.visibility = 'hidden';
+          }
+          else if(transcript.includes('turn on display')|| transcript.includes('turn display on')){
+            words.style.visibility = 'visible';
+          }
+
+          console.log(transcript);
+
+  });
+
+  recognition.addEventListener('end', recognition.start);
+
+  recognition.start();
+
+
+
+
+var cornify_count = 0;
+cornify_add = function() {
+	cornify_count += 1;
+	var cornify_url = 'http://www.cornify.com/';
+	var div = document.createElement('div');
+	div.style.position = 'fixed';
+	
+	var numType = 'px';
+	var heightRandom = Math.random()*.75;
+	var windowHeight = 768;
+	var windowWidth = 1024;
+	var height = 0;
+	var width = 0;
+	var de = document.documentElement;
+	if (typeof(window.innerHeight) == 'number') {
+		windowHeight = window.innerHeight;
+		windowWidth = window.innerWidth;
+	} else if(de && de.clientHeight) {
+		windowHeight = de.clientHeight;
+		windowWidth = de.clientWidth;
+	} else {
+		numType = '%';
+		height = Math.round( height*100 )+'%';
+	}
+	
+	div.onclick = cornify_add;
+	div.style.zIndex = 10;
+	div.style.outline = 0;
+	
+	if( cornify_count==15 ) {
+		div.style.top = Math.max( 0, Math.round( (windowHeight-530)/2 ) )  + 'px';
+		div.style.left = Math.round( (windowWidth-530)/2 ) + 'px';
+		div.style.zIndex = 1000;
+	} else {
+		if( numType=='px' ) div.style.top = Math.round( windowHeight*heightRandom ) + numType;
+		else div.style.top = height;
+		div.style.left = Math.round( Math.random()*90 ) + '%';
+	}
+	
+	var img = document.createElement('img');
+	var currentTime = new Date();
+	var submitTime = currentTime.getTime();
+	if( cornify_count==15 ) submitTime = 0;
+	img.setAttribute('src',cornify_url+'getacorn.php?r=' + submitTime + '&url='+document.location.href);
+	var ease = "all .1s linear";
+	//div.style['-webkit-transition'] = ease;
+	//div.style.webkitTransition = ease;
+	div.style.WebkitTransition = ease;
+	div.style.WebkitTransform = "rotate(1deg) scale(1.01,1.01)";
+	//div.style.MozTransition = "all .1s linear";
+	div.style.transition = "all .1s linear";
+	div.onmouseover = function() {
+		var size = 1+Math.round(Math.random()*10)/100;
+		var angle = Math.round(Math.random()*20-10);
+		var result = "rotate("+angle+"deg) scale("+size+","+size+")";
+		this.style.transform = result;
+		//this.style['-webkit-transform'] = result;
+		//this.style.webkitTransform = result;
+		this.style.WebkitTransform = result;
+		//this.style.MozTransform = result;
+		//alert(this + ' | ' + result);
+	}
+	div.onmouseout = function() {
+		var size = .9+Math.round(Math.random()*10)/100;
+		var angle = Math.round(Math.random()*6-3);
+		var result = "rotate("+angle+"deg) scale("+size+","+size+")";
+		this.style.transform = result;	
+		//this.style['-webkit-transform'] = result;
+		//this.style.webkitTransform = result;
+		this.style.WebkitTransform = result;
+		//this.style.MozTransform = result;
+	}
+	var body = document.getElementsByTagName('body')[0];
+	body.appendChild(div);
+	div.appendChild(img);	
+	
+	// Add stylesheet.
+	if (cornify_count == 5) {
+		var cssExisting = document.getElementById('__cornify_css');
+		if (!cssExisting) {
+			var head = document.getElementsByTagName("head")[0];
+			var css = document.createElement('link');
+			css.id = '__cornify_css';
+			css.type = 'text/css';
+			css.rel = 'stylesheet';
+			css.href = 'http://www.cornify.com/css/cornify.css';
+			css.media = 'screen';
+			head.appendChild(css);
+		}
+		cornify_replace();
+	}	
+}
+
+cornify_replace = function() {
+	// Replace text.
+	var hc = 6, hs, h, k;
+	var words = ['Happy','Sparkly','Glittery','Fun','Magical','Lovely','Cute','Charming','Amazing','Wonderful'];
+	while(hc >= 1) {
+		hs = document.getElementsByTagName('h' + hc);
+		for (k = 0; k < hs.length; k++) {
+			h = hs[k];
+			h.innerHTML = words[Math.floor(Math.random()*words.length)] + ' ' + h.innerHTML;
+		}
+		hc-=1;
+	}
+}
+
+/*
+ * Adapted from http://www.snaptortoise.com/konami-js/
+ */
+var cornami = {
+	input:"",
+	pattern:"38384040373937396665",
+	clear:setTimeout('cornami.clear_input()',5000),
+	load: function() {
+		window.document.onkeydown = function(e) {
+			if (cornami.input == cornami.pattern) {
+				cornify_add();
+				clearTimeout(cornami.clear);
+				return;
+			}
+			else {
+				cornami.input += e ? e.keyCode : event.keyCode;
+				if (cornami.input == cornami.pattern) cornify_add();
+				clearTimeout(cornami.clear);
+				cornami.clear = setTimeout("cornami.clear_input()", 5000);
+			}
+		}
+	},
+	clear_input: function() {
+		cornami.input="";
+		clearTimeout(cornami.clear);
+	}
+}
+cornami.load();
+</script>
+
+
+  <style>
+    html {
+      font-size: 10px;
+    }
+
+    body {
+      background:#ffc600;
+      font-family: 'helvetica neue';
+      font-weight: 200;
+      font-size: 20px;
+    }
+
+    .words {
+      max-width:500px;
+      margin:50px auto;
+      background:white;
+      border-radius:5px;
+      box-shadow:10px 10px 0 rgba(0,0,0,0.1);
+      padding:1rem 2rem 1rem 5rem;
+      background: -webkit-gradient(linear, 0 0, 0 100%, from(#d9eaf3), color-stop(4%, #fff)) 0 4px;
+      background-size: 100% 3rem;
+      position: relative;
+      line-height:3rem;
+    }
+    p {
+      margin: 0 0 3rem;
+    }
+
+    .words:before {
+      content: '';
+      position: absolute;
+      width: 4px;
+      top: 0;
+      left: 30px;
+      bottom: 0;
+      border: 1px solid;
+      border-color: transparent #efe4e4;
+    }
+
+
+h1, h2, h3, h4, h5, h6, h1 a, h2 a, h3 a, h4 a, h5 a, h6 a, a, a:link {
+	color: #FF00FF;
+	font-family: "Comic Sans MS", "Marker Felt";
+}
+
+.cornify_pic {
+	-webkit-transform: rotate(5deg) scale(1,1); 
+	-moz-transform: rotate(5deg) scale(1,1); 
+	transform: rotate(5deg) scale(1,1); 
+	-webkit-transition: all .1s linear;
+	-moz-transition: all .1s linear;
+	transition: all .1s linear;	
+}
+
+.cornify_pic:hover {
+	-webkit-transform: rotate(-10deg) scale(1.2,1.2); 
+	-moz-transform: rotate(-10deg) scale(1.2,1.2); 
+	transform: rotate(-10deg) scale(1.2,1.2); 
+
+  </style>
+
+</body>
+</html>
